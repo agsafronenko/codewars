@@ -1,5 +1,9 @@
 // 'use strict
 
+// to set-up "live-server" for another html file use this command:
+// "   live-server --port=1234 --open=public --entry-file=index2.html   "
+// where index2.html is the name of html file.
+
 // 4 kyu
 // How many numbers III?
 

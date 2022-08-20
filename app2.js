@@ -92,7 +92,7 @@ function findAll(n, k) {
 
   let satisfiedNum = [];
 
-  for (let i = endingNum; i >= startingNum; i--) {
+  for (let i = endingNum; i >= startingNum; i = i - 9) {
     let sumOfDigits = 0;
     let valueInQ = i + 0;
     let digit;
@@ -115,6 +115,7 @@ function findAll(n, k) {
   }
   const duration = performance.now() - start;
   console.log(duration);
+
   return [
     satisfiedNum.length,
     satisfiedNum[satisfiedNum.length - 1].toString(),
@@ -123,6 +124,6 @@ function findAll(n, k) {
 }
 
 console.log(findAll(10, 3)); // [8, 118, 334]
-console.log(findAll(27, 3)); // [1, "999", "999"])
-console.log(findAll(84, 4)); // []
-console.log(findAll(35, 6)); // [123, '116999', '566666'])
+// console.log(findAll(27, 3)); // [1, "999", "999"])
+// console.log(findAll(84, 4)); // []
+// console.log(findAll(35, 6)); // [123, '116999', '566666'])

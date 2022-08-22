@@ -12,11 +12,32 @@
 
 function solution(list) {
   let delta = [];
-  let noZeros = list.filter((x) => x !== 0);
-  for (let i = 1; i < noZeros.length - 1; i++) {
-    delta.push(noZeros[i] - noZeros[i - 1]);
+  let group = [];
+  let staticList = list.slice();
+  for (let i = 0; i < list.length; i++) {
+    delta.push([list[i], Math.abs(list[i] - list[i + 1])]);
   }
-  console.log(delta);
+  delta = delta.map((x) => (isNaN(x[1]) ? [x[0], (x[1] = 0)] : [x[0], x[1]]));
+  let count = 0;
+  for (let i = 0; i < delta.length; i++) {
+    if (delta[i][1] === 1) {
+      count++;
+      if (delta[i + 1][1] !== 1 && count > 1) {
+        group.push([i - count + 1, i + 1]);
+      }
+    } else {
+      count = 0;
+    }
+  }
+  for (let i = group.length - 1; i >= 0; i--) {
+    list.splice(
+      group[i][0],
+      group[i][1] - group[i][0] + 1,
+      String(staticList[group[i][0]]) + "-" + String(staticList[group[i][1]])
+    );
+  }
+  list = list.map((x) => String(x)).toString();
+  return list;
 }
 
 console.log(

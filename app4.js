@@ -55,7 +55,7 @@ function nextSmaller(n) {
   return replaced === false ? -1 : result;
 }
 
-// console.log(nextSmaller(1207)); // 1072
+console.log(nextSmaller(1207)); // 1072
 // console.log(nextSmaller(135)); // -1
 // console.log(nextSmaller(2071)); // 2017
 console.log(nextSmaller(1027)); // -1

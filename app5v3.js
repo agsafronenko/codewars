@@ -6,50 +6,35 @@
 // The Sudokus tested against your function will be "easy" (i.e. determinable; there will be no need to assume and test possibilities on unknowns) and can be solved with a brute-force approach.
 
 function sudoku(puzzle) {
-  // forming 27 arrays based on: 9 rows, 9 cols, 9 sqrs
-  let row = [];
-  let col = [];
   let sqr = [];
-  let changes = [
-    [1, 1, 1],
-    [2, 2, 2],
-  ];
+  let changes = [];
   let fullArr = puzzle.flat();
   fullArr = fullArr.map((x, i) => [x, i]);
 
   for (let i = 0; i < 4; i++) {
-    row[i] = [];
     for (let j = 0 + i * 4; j < 4 + i * 4; j++) {
       fullArr[j].push("row" + (i + 1));
     }
   }
 
   for (let i = 0; i < 4; i++) {
-    col[i] = [];
     for (let j = 0 + i; j < 16; j = j + 4) {
-      fullArr[j].push(
-        "col" + (i + 1),
-        "lastChangeInd:",
-        0,
-        "lastChangeDig:",
-        0
-      );
+      fullArr[j].push("col" + (i + 1));
     }
   }
 
-  // for (let i = 0; i < 4; i++) {
-  //   let l = i >= 2 ? 4 : 0; // makes a jump between 3rd/4th and 6th/7th squares
-  //   sqr[i] = [];
-  //   for (let j = l + i * 2; sqr[i].length < 4; j = j + 4) {
-  //     for (let k = 0; k < 2; k++) {
-  //       fullArr[j + k].push("sqr" + (i + 1));
-  //     }
-  //   }
-  // }
-  // console.log(fullArr);
+  for (let i = 0; i < 4; i++) {
+    let l = i >= 2 ? 4 : 0; // makes a jump between 2nd/3rd squares
+    sqr[i] = [];
+    for (let j = l + i * 2; sqr[i].length < 4; j = j + 4) {
+      for (let k = 0; k < 2; k++) {
+        fullArr[j + k].push("sqr" + (i + 1));
+        sqr[i].push("x"); // array requires to stop the loop once it's length reaches 4
+      }
+    }
+  }
 
   // brute-force approach:
-  // console.log(fullArr);
   let lastChangeIndex;
   let lastChangeDigit;
 
@@ -66,8 +51,9 @@ function sudoku(puzzle) {
       let indQ = fullArr[n];
       let rowQ = fullArr.filter((x) => x[2] === indQ[2]).map((x) => x[0]);
       let colQ = fullArr.filter((x) => x[3] === indQ[3]).map((x) => x[0]);
+      let sqrQ = fullArr.filter((x) => x[4] === indQ[4]).map((x) => x[0]);
       for (let j = startingDigit; j <= 4; j++) {
-        if (rowQ.includes(j) || colQ.includes(j)) {
+        if (rowQ.includes(j) || colQ.includes(j) || sqrQ.includes(j)) {
           continue;
         } else {
           changes.push([fullArr[n][0], fullArr[n][1], j]);
@@ -87,7 +73,7 @@ function sudoku(puzzle) {
   function reverse(fullArr) {
     let lastChange = changes.splice(changes.length - 1).flat();
     // lastChange: 0, 1, 2     dig bef, ind, dig aft
-    // fullArr: n, i, row, col, "lastIndex", lastInd, "lastDig", lastDig
+    // fullArr: n, i, row, col, sqr
     fullArr[lastChange[1]][0] = lastChange[0];
     lastChangeIndex = lastChange[1];
     lastChangeDigit = lastChange[2];
@@ -104,7 +90,7 @@ function sudoku(puzzle) {
 var puzzle = [
   [0, 0, 1, 0],
   [0, 0, 0, 0],
-  [0, 4, 3, 0],
+  [0, 4, 0, 0],
   [1, 0, 2, 4],
 ];
 

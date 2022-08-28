@@ -1,64 +1,90 @@
 "use strict";
-// Write a function that takes a positive integer and returns the next smaller positive integer containing the same digits.
 
-// For example:
+// DESCRIPTION:
+// Write a function that will solve a 9x9 Sudoku puzzle. The function will take one argument consisting of the 2D puzzle array, with the value 0 representing an unknown square.
 
-// nextSmaller(21) == 12
-// nextSmaller(531) == 513
-// nextSmaller(2071) == 2017
-// Return -1 (for Haskell: return Nothing, for Rust: return None), when there is no smaller number that contains the same digits. Also return -1 when the next smaller number with the same digits would require the leading digit to be zero.
+// The Sudokus tested against your function will be "easy" (i.e. determinable; there will be no need to assume and test possibilities on unknowns) and can be solved with a brute-force approach.
 
-// nextSmaller(9) == -1
-// nextSmaller(111) == -1
-// nextSmaller(135) == -1
-// nextSmaller(1027) == -1 // 0721 is out since we don't write numbers with leading zeros
-// some tests will include very large numbers.
-// test data only employs positive integers.
+function sudoku(puzzle) {
+  // forming 27 arrays based on: 9 rows, 9 cols, 9 sqrs
+  let row = [];
+  let col = [];
+  let sqr = [];
+  let fullArr = puzzle.flat();
+  fullArr = fullArr.map((x, i) => [x, i]); // assigning each number indiviual index [0, ..., 80]
 
-function nextSmaller(n) {
-  let origNumArr = String(n).split("");
-  let replaced = false;
-  let result;
-  let numToReplace;
-  let arrToRearrange;
-  for (let i = origNumArr.length - 1; i >= 0; i--) {
-    if (origNumArr[i - 1] === undefined) {
-      break;
-    }
-    if (origNumArr[i] >= origNumArr[i - 1]) {
-      continue;
-    } else {
-      arrToRearrange = origNumArr.slice(i).map((x, i) => [Number(x), i]);
-      let staticArrToRearrange = arrToRearrange.slice();
-      numToReplace = arrToRearrange
-        .sort((a, b) => b[0] - a[0])
-        .filter((x) => origNumArr[i - 1] > x)[0];
-      //   if (numToReplace[0] === 0) {
-      //     break;
-      //   }
-      let tempValueStorage = origNumArr[i - 1];
-      origNumArr[i - 1] = staticArrToRearrange[numToReplace[1]][0];
-      staticArrToRearrange[numToReplace[1]][0] = Number(tempValueStorage);
-      let rearranged = staticArrToRearrange
-        .map((x) => x[0])
-        .sort((a, b) => b - a);
-      let stringResult = origNumArr.slice(0, i).concat(rearranged).join("");
-      if (stringResult[0] === "0") {
-        break;
-      }
-      result = Number(stringResult);
-      replaced = true;
-      break;
+  for (let i = 0; i < 9; i++) {
+    // delete later as it just clone of argument
+    row[i] = [];
+    for (let j = 0 + i * 9; j < 9 + i * 9; j++) {
+      fullArr[j].push(i);
+      row[i].push(fullArr[j][0]);
     }
   }
+  for (let i = 0; i < 9; i++) {
+    col[i] = [];
+    for (let j = 0 + i; j < 81; j = j + 9) {
+      fullArr[j].push(i);
+      col[i].push(fullArr[j][0]);
+    }
+  }
+  for (let i = 0; i < 9; i++) {
+    let l = i >= 6 ? 36 : i >= 3 ? 18 : 0; // makes a jump between 3rd/4th and 6th/7th squares
+    sqr[i] = [];
+    for (let j = l + i * 3; sqr[i].length < 9; j = j + 9) {
+      for (let k = 0; k < 3; k++) {
+        fullArr[j + k].push(i);
+        sqr[i].push(fullArr[j + k][0]);
+      }
+    }
+  }
+  // console.log("set-up:", fullArr);
+  // brute-force approach:
 
-  return replaced === false ? -1 : result;
+  solve(fullArr);
+  function solve(arr) {
+    for (let i = 0; i < arr.length; i++) {
+      console.log("i", i, arr);
+      if (arr[i][0] !== 0) {
+        continue;
+      } else {
+        let rowQ = row[arr[i][2]];
+        let colQ = col[arr[i][3]];
+        let sqrQ = sqr[arr[i][4]];
+        for (let j = 1; j <= 9; j++) {
+          if (rowQ.includes(j) || colQ.includes(j) || sqrQ.includes(j)) {
+            continue;
+          } else {
+            arr[i].splice(0, 1, j);
+            break;
+          }
+        }
+      }
+    }
+  }
 }
 
-// console.log(nextSmaller(1207)); // 1072
-// console.log(nextSmaller(135)); // -1
-// console.log(nextSmaller(2071)); // 2017
-console.log(nextSmaller(1027)); // -1
-// console.log(nextSmaller(123456789)); // -1
-// console.log(nextSmaller(1234567908)); // 1234567890
-// console.log(nextSmaller(97038)); // 93870
+var puzzle = [
+  [5, 3, 0, 0, 7, 0, 0, 0, 0],
+  [6, 0, 0, 1, 9, 5, 0, 0, 0],
+  [0, 9, 8, 0, 0, 0, 0, 6, 0],
+  [8, 0, 0, 0, 6, 0, 0, 0, 3],
+  [4, 0, 0, 8, 0, 3, 0, 0, 1],
+  [7, 0, 0, 0, 2, 0, 0, 0, 6],
+  [0, 6, 0, 0, 0, 0, 2, 8, 0],
+  [0, 0, 0, 4, 1, 9, 0, 0, 5],
+  [0, 0, 0, 0, 8, 0, 0, 7, 9],
+];
+
+sudoku(puzzle);
+
+/* Should return
+[[5,3,4,6,7,8,9,1,2],
+[6,7,2,1,9,5,3,4,8],
+[1,9,8,3,4,2,5,6,7],
+[8,5,9,7,6,1,4,2,3],
+[4,2,6,8,5,3,7,9,1],
+[7,1,3,9,2,4,8,5,6],
+[9,6,1,5,3,7,2,8,4],
+[2,8,7,4,1,9,6,3,5],
+[3,4,5,2,8,6,1,7,9]] */

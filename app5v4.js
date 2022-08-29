@@ -5,34 +5,30 @@
 
 // The Sudokus tested against your function will be "easy" (i.e. determinable; there will be no need to assume and test possibilities on unknowns) and can be solved with a brute-force approach.
 
-// brute-force through loop (recursion will stuck at error "maximum call stack size exceeded")
+// loop approach
 
 function sudoku(puzzle) {
-  // using arguments ("puzzle") to form full array: [digit, it's index, it's row, it's col, it's sqr]
+  let sqr = [];
+  let changes = [];
   let fullArr = [];
 
-  // making an array of all digits
+  // using concat instead of flat() func as codewars don't consider flat() as a function
   for (let i = 0; i < puzzle.length; i++) {
-    fullArr = fullArr.concat(puzzle[i]); // using concat instead of flat() func as codewars don't consider flat() as a function
+    fullArr = fullArr.concat(puzzle[i]);
   }
   // fullArr = puzzle.flat();
-
-  fullArr = fullArr.map((x, i) => [x, i]); // assigning each digit indiviual index [0, ..., 80]
+  fullArr = fullArr.map((x, i) => [x, i]); // assigning each number indiviual index [0, ..., 80]
 
   for (let i = 0; i < 9; i++) {
-    // assigning each digit it's row
     for (let j = 0 + i * 9; j < 9 + i * 9; j++) {
       fullArr[j].push("row" + (i + 1));
     }
   }
   for (let i = 0; i < 9; i++) {
-    // assigning each digit it's column
     for (let j = 0 + i; j < 81; j = j + 9) {
       fullArr[j].push("col" + (i + 1));
     }
   }
-
-  let sqr = []; // assigning each digit it's square
   for (let i = 0; i < 9; i++) {
     let l = i >= 6 ? 36 : i >= 3 ? 18 : 0; // makes a jump between 3rd/4th and 6th/7th squares
     sqr[i] = [];
@@ -44,38 +40,31 @@ function sudoku(puzzle) {
     }
   }
 
-  let changes = []; // storing all changes made to "puzzle"
-  let lastChangeIndex; // storing the index of the last changed digit
-  let lastChangeDigit; // storing the last digit that was changed
-  let startingDigit = 1; // brute-force for a digit will start from this value (1: by default; lastChangeDigit + 1: in case the last changed digit led to breaking sudoku rules)
+  // brute-force approach:
+  let lastChangeIndex;
+  let lastChangeDigit;
+  let startingDigit = 1;
 
   for (let n = 0; n < 81; n++) {
-    // brute-forcing
     if (fullArr[n][0] !== 0) {
-      // pass the digits that were predifined at start
       startingDigit = 1;
       continue;
     } else {
-      let indQ = fullArr[n]; // define row, col and sqr of the digit to be brute-forced
+      let indQ = fullArr[n];
       let rowQ = fullArr.filter((x) => x[2] === indQ[2]).map((x) => x[0]);
       let colQ = fullArr.filter((x) => x[3] === indQ[3]).map((x) => x[0]);
       let sqrQ = fullArr.filter((x) => x[4] === indQ[4]).map((x) => x[0]);
       for (let j = startingDigit; j <= 9; j++) {
         if (rowQ.includes(j) || colQ.includes(j) || sqrQ.includes(j)) {
-          // if the new value of the digit contradict the sudoku rules, continue with the next value
           continue;
         } else {
-          changes.push([fullArr[n][0], fullArr[n][1], j]); // if the new value of the digit doesn't contradict the sudoku rules, set this value for the digit
+          changes.push([fullArr[n][0], fullArr[n][1], j]);
           fullArr[n][0] = j;
           break;
         }
       }
       if (fullArr[n][0] === 0) {
-        if (changes.length === 0) {
-          // check whether the sudoku can be solved
-          return "Check your digits! With current digits sudoku can't be solved.";
-        }
-        reverse(fullArr); // if all digits contradict the sudoku rules, revert the last change and continue brute-forcing for the last changed digit (not from default value "1", but from "lastChangedDigit + 1"):
+        reverse(fullArr);
         n = lastChangeIndex - 1;
         startingDigit = lastChangeDigit + 1;
       } else {
@@ -85,7 +74,6 @@ function sudoku(puzzle) {
   }
 
   function reverse(fullArr) {
-    // revert fullArr to the state before the last change and delete the record of the last change from changes array
     // let lastChange = changes.splice(changes.length - 1).flat();
     let lastChange = [].concat(...changes.splice(changes.length - 1)); // using concat instead of flat() func as codewars don't consider flat() as a function
     fullArr[lastChange[1]][0] = lastChange[0];
@@ -94,7 +82,7 @@ function sudoku(puzzle) {
     return fullArr;
   }
 
-  let digitsOnly = fullArr.map((x) => x[0]); // make a 2D array from the final version of fullArr
+  let digitsOnly = fullArr.map((x) => x[0]);
   let finalArr = [];
   makesNineArrays(digitsOnly);
   function makesNineArrays(digitsOnly) {
@@ -106,10 +94,11 @@ function sudoku(puzzle) {
     }
   }
 
+  console.log("loop approach:", finalArr);
   return finalArr;
 }
 
-var puzzle = [
+sudoku([
   [5, 3, 0, 0, 7, 0, 0, 0, 0],
   [6, 0, 0, 1, 9, 5, 0, 0, 0],
   [0, 9, 8, 0, 0, 0, 0, 6, 0],
@@ -119,9 +108,7 @@ var puzzle = [
   [0, 6, 0, 0, 0, 0, 2, 8, 0],
   [0, 0, 0, 4, 1, 9, 0, 0, 5],
   [0, 0, 0, 0, 8, 0, 0, 7, 9],
-];
-
-console.log(sudoku(puzzle));
+]);
 
 /* Should return
 [[5,3,4,6,7,8,9,1,2],

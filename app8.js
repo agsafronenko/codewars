@@ -33,41 +33,61 @@
 // Can you find two other algorithmically different approaches to solve this puzzle? The refrence solutions in JavaScript, C# and Python solve the puzzle in fundamentally different ways.
 
 function calculateSpecial(lastDigit, base) {
-  // const start = performance.now();
-  let result;
-  let n = 4;
-  let k = 7;
-
-  parasite(n * k);
-
-  function parasite(number) {
-    if (replace(number) === number) {
-      result = replace(number);
-      console.log(result);
-      return result;
-    } else {
-      let newNumber = cut(number, k);
-      let newNewNumber = newNumber * n;
-      parasite(newNewNumber);
+  let number = lastDigit;
+  let count = 0; // delete later
+  while (!conditions() && count < 10000) {
+    console.log(
+      "count",
+      count,
+      "number",
+      number,
+      "replace",
+      replace(number * lastDigit)
+    );
+    number = cut(number * lastDigit, number);
+    count++;
+  }
+  function replace(number) {
+    let split = number.toString().split("");
+    let first = split.splice(0, 1);
+    if (split[0] === "0") {
+      split[1] = split[1] + 1;
     }
+    return Number(split.concat(first).join(""));
+  }
+  function cut(product, number) {
+    let split = product.toString().split("");
+    return number === Number(split.slice(1).concat(lastDigit).join(""))
+      ? Number(split.concat(lastDigit).join(""))
+      : Number(split.slice(1).concat(lastDigit).join(""));
+  }
+  function lastDigitFunc(number) {
+    let split = number.toString().split("");
+    let last = Number(split.slice(-1));
+    return last === lastDigit;
+  }
+  function conditions() {
+    return [
+      number === replace(number * lastDigit),
+      lastDigitFunc(number),
+    ].every((x) => x === true);
   }
 
-  console.log("final result:", result);
-  // const duration = performance.now() - start;
-  // console.log("duration:", duration);
-  return result;
-}
-
-function replace(num) {
-  let split = num.toString().split("");
-  let first = split.splice(0, 1);
-  return Number(split.concat(first).join(""));
-}
-
-function cut(num, k) {
-  let split = num.toString().split("");
-  return Number(split.slice(1).concat(k).join(""));
+  console.log("final result:", number.toString());
+  return number.toString();
 }
 
 calculateSpecial(4, 10); // '102564'   --> 4  *  102564   = 410256
 // calculateSpecial(4,16); // '104'
+// calculateSpecial(2,8);
+// calculateSpecial(3, 8);
+// calculateSpecial(4, 8);
+// calculateSpecial(5, 8);
+// calculateSpecial(6, 8);
+// calculateSpecial(7, 8);
+
+let digit = 13244678;
+let hex = digit.toString(16);
+console.log(hex);
+let dec = parseInt(hex, 16);
+console.log(dec);

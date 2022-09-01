@@ -33,61 +33,67 @@
 // Can you find two other algorithmically different approaches to solve this puzzle? The refrence solutions in JavaScript, C# and Python solve the puzzle in fundamentally different ways.
 
 function calculateSpecial(lastDigit, base) {
-  let number = lastDigit;
+  let number = parseInt(lastDigit, base); // 4 in dec
   let count = 0; // delete later
   while (!conditions() && count < 10000) {
     console.log(
-      "count",
+      "#",
       count,
       "number",
-      number,
+      number.toString(base),
+      "product",
+      (number * lastDigit).toString(base),
       "replace",
-      replace(number * lastDigit)
+      replace((number * lastDigit).toString(base)),
+      "cut",
+      cut((number * lastDigit).toString(base), number.toString(base))
     );
-    number = cut(number * lastDigit, number);
+    number = parseInt(
+      cut((number * lastDigit).toString(base), number.toString(base)),
+      base
+    );
     count++;
   }
-  function replace(number) {
-    let split = number.toString().split("");
+  function replace(numberInBaseFormat) {
+    let split = numberInBaseFormat.split("");
     let first = split.splice(0, 1);
     if (split[0] === "0") {
-      split[1] = split[1] + 1;
+      split.push("11111111");
     }
-    return Number(split.concat(first).join(""));
+    return split.concat(first).join("");
   }
-  function cut(product, number) {
-    let split = product.toString().split("");
-    return number === Number(split.slice(1).concat(lastDigit).join(""))
-      ? Number(split.concat(lastDigit).join(""))
-      : Number(split.slice(1).concat(lastDigit).join(""));
+  function cut(productInBaseFormat, numberInBaseFormat) {
+    let split = productInBaseFormat.split("");
+    let cutRes =
+      numberInBaseFormat ===
+      split.slice(1).concat(lastDigit.toString(base)).join("")
+        ? split.concat(lastDigit.toString(base)).join("")
+        : split.slice(1).concat(lastDigit.toString(base)).join("");
+    return cutRes[0] === "0"
+      ? split.concat(lastDigit.toString(base)).join("")
+      : cutRes;
   }
-  function lastDigitFunc(number) {
-    let split = number.toString().split("");
-    let last = Number(split.slice(-1));
-    return last === lastDigit;
+  function lastDigitFunc(numberInBaseFormat) {
+    let split = numberInBaseFormat.split("");
+    let last = split.slice(-1);
+    return last[0] === lastDigit.toString(base);
   }
   function conditions() {
     return [
-      number === replace(number * lastDigit),
-      lastDigitFunc(number),
+      number.toString(base) === replace((number * lastDigit).toString(base)), // reviewed
+      lastDigitFunc(number.toString(base)),
     ].every((x) => x === true);
   }
 
-  console.log("final result:", number.toString());
-  return number.toString();
+  console.log("final result:", number.toString(base));
+  return number.toString(base);
 }
 
-calculateSpecial(4, 10); // '102564'   --> 4  *  102564   = 410256
-// calculateSpecial(4,16); // '104'
-// calculateSpecial(2,8);
-// calculateSpecial(3, 8);
+// calculateSpecial(4, 10); // '102564'   --> 4  *  102564   = 410256
+// calculateSpecial(4, 16); // '104'
+// calculateSpecial(2, 8);
+// calculateSpecial(3, 8); // <----
 // calculateSpecial(4, 8);
 // calculateSpecial(5, 8);
-// calculateSpecial(6, 8);
-// calculateSpecial(7, 8);
-
-let digit = 13244678;
-let hex = digit.toString(16);
-console.log(hex);
-let dec = parseInt(hex, 16);
-console.log(dec);
+// calculateSpecial(6, 8); // <----
+calculateSpecial(7, 8); // <----

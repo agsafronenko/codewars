@@ -35,7 +35,8 @@
 function calculateSpecial(lastDigit, base) {
   let number = parseInt(lastDigit, base); // 4 in dec
   let count = 0; // delete later
-  while (!conditions() && count < 10000) {
+  let prevCut = "0";
+  while (!conditions() && count < 25) {
     console.log(
       "#",
       count,
@@ -44,9 +45,7 @@ function calculateSpecial(lastDigit, base) {
       "product",
       (number * lastDigit).toString(base),
       "replace",
-      replace((number * lastDigit).toString(base)),
-      "cut",
-      cut((number * lastDigit).toString(base), number.toString(base))
+      replace((number * lastDigit).toString(base))
     );
     number = parseInt(
       cut((number * lastDigit).toString(base), number.toString(base)),
@@ -62,16 +61,41 @@ function calculateSpecial(lastDigit, base) {
     }
     return split.concat(first).join("");
   }
+
   function cut(productInBaseFormat, numberInBaseFormat) {
     let split = productInBaseFormat.split("");
-    let cutRes =
-      numberInBaseFormat ===
-      split.slice(1).concat(lastDigit.toString(base)).join("")
+    let firstOmitted = split.slice(1);
+    let currCut1 =
+      firstOmitted[0] === "0" || split.length === 1
         ? split.concat(lastDigit.toString(base)).join("")
         : split.slice(1).concat(lastDigit.toString(base)).join("");
-    return cutRes[0] === "0"
-      ? split.concat(lastDigit.toString(base)).join("")
-      : cutRes;
+    let currCut2 =
+      prevCut !== currCut1
+        ? currCut1
+        : split.slice().concat(lastDigit.toString(base)).join("");
+    prevCut = currCut2;
+    console.log(
+      "split",
+      split,
+      "firstOmitted",
+      firstOmitted,
+      "currCut1",
+      currCut1,
+      "currCut2",
+      currCut2,
+      "prevCut",
+      prevCut
+    );
+    return currCut2;
+
+    // let cutRes =
+    //   numberInBaseFormat ===
+    //   split.slice(1).concat(lastDigit.toString(base)).join("")
+    //     ? split.concat(lastDigit.toString(base)).join("")
+    //     : split.slice(1).concat(lastDigit.toString(base)).join("");
+    // return cutRes[0] === "0"
+    //   ? split.concat(lastDigit.toString(base)).join("")
+    //   : cutRes;
   }
   function lastDigitFunc(numberInBaseFormat) {
     let split = numberInBaseFormat.split("");
@@ -95,5 +119,31 @@ function calculateSpecial(lastDigit, base) {
 // calculateSpecial(3, 8); // <----
 // calculateSpecial(4, 8);
 // calculateSpecial(5, 8);
-// calculateSpecial(6, 8); // <----
-calculateSpecial(7, 8); // <----
+calculateSpecial(6, 8); // <----
+// calculateSpecial(7, 8); // <----
+
+function calculateSpecial2(n, base) {
+  let curr = n,
+    decimalStr = "",
+    dn = base * n - 1,
+    remainder;
+  do {
+    decimalStr += (~~(curr / dn)).toString(base);
+    if (dn <= curr) {
+      curr = remainder = curr % dn;
+    }
+    curr *= base;
+  } while (remainder !== n);
+  console.log("final 2:", decimalStr.slice(1));
+  return decimalStr.slice(1); // excludes integer part
+}
+
+calculateSpecial2(2, 8); // 1042
+calculateSpecial2(3, 8); // 10262054413
+calculateSpecial2(4, 8); // 10204
+calculateSpecial2(5, 8); // 1015
+calculateSpecial2(6, 8); // 10127114202562304053446
+calculateSpecial2(7, 8); // 10112362022474404517
+
+console.log(10127114202562304053446 * 4);
+console.log(10127114202562304053446n * 4n);

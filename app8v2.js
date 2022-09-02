@@ -33,15 +33,14 @@
 // Can you find two other algorithmically different approaches to solve this puzzle? The refrence solutions in JavaScript, C# and Python solve the puzzle in fundamentally different ways.
 
 function calculateSpecial(lastDigit, base) {
-  let baseStr = base === 10 ? "" : base === 16 ? "0x" : "0o"; // selecting base prefix for BigInt()
-  let number = BigInt(baseStr + lastDigit);
-  lastDigit = BigInt(baseStr + lastDigit);
+  let number = lastDigit.toString(base);
+  lastDigit = lastDigit.toString(base);
   let count = 0; // used for testing purposes to avoid infinite calculations
   let prevCut = "0"; // memory storage for previous number
-
+  let multiplication = "";
   // core of the function: increases number until conditions are met
-  while (!conditions() && count < 25) {
-    number = BigInt(baseStr + cut((number * lastDigit).toString(base)));
+  while (!conditions() && count < 100) {
+    number = cut(multiplication);
     count++;
   }
 
@@ -69,6 +68,7 @@ function calculateSpecial(lastDigit, base) {
         ? currCut1
         : split.slice().concat(lastDigit.toString(base)).join("");
     prevCut = currCut2;
+    console.log("split", split, "currCut1", currCut1, "currCut2", currCut2);
     return currCut2;
   }
 
@@ -81,23 +81,111 @@ function calculateSpecial(lastDigit, base) {
 
   // unites two checks: whether the given number is a special parasitic number
   function conditions() {
+    multiplication = multiply(number, lastDigit, base);
+    console.log(
+      "number",
+      number.toString(base),
+      "multiplication",
+      multiplication,
+      "replace",
+      replace(multiplication)
+    );
     return [
-      number.toString(base) === replace((number * lastDigit).toString(base)),
+      number.toString(base) === replace(multiplication),
       lastDigitFunc(number.toString(base)),
     ].every((x) => x === true);
   }
 
-  console.log("args:", ...arguments, "final result:", number.toString(base));
+  console.log(
+    "args:",
+    ...arguments,
+    "final result:",
+    number.toString(base),
+    "count",
+    count
+  );
   return number.toString(base);
+
+  function multiply(a, b, base) {
+    const product = Array(a.length + b.length).fill(0);
+    for (let i = a.length; i--; null) {
+      let carry = 0;
+      for (let j = b.length; j--; null) {
+        product[1 + i + j] = (
+          parseInt(product[1 + i + j], base) +
+          parseInt(carry, base) +
+          parseInt(a[i], base) * parseInt(b[j], base)
+        ).toString(base);
+        carry = Math.floor(parseInt(product[1 + i + j], base) / base).toString(
+          base
+        );
+        product[1 + i + j] = (
+          parseInt(product[1 + i + j], base) % base
+        ).toString(base);
+      }
+      product[i] = (
+        parseInt(product[i], base) + parseInt(carry, base)
+      ).toString(base);
+    }
+    return product.join("").replace(/^0*(\d||[a-z])/, "$1");
+  }
 }
 
-calculateSpecial(4, 10); // '102564'   --> 4  *  102564   = 410256
-calculateSpecial(5, 10);
-calculateSpecial(6, 10);
-calculateSpecial(4, 16); // 104
-calculateSpecial(2, 8); // 1042
-calculateSpecial(3, 8); // 10262054413
-calculateSpecial(4, 8); // 10204
-calculateSpecial(5, 8); // 1015
-calculateSpecial(6, 8); // 10127114202562304053446
-calculateSpecial(7, 8); // 10112362022474404517
+// calculateSpecial(4, 10); // '102564'   --> 4  *  102564   = 410256
+// calculateSpecial(5, 10); // 102040816326530612244897959183673469387755
+// calculateSpecial(6, 10); //1016949152542372881355932203389830508474576271186440677966
+// calculateSpecial(3, 16); // 10572620ae4c415c9882b93
+// calculateSpecial(4, 16); // 104
+// calculateSpecial(10, 16); // 1019c2d14ee4a
+// calculateSpecial(12, 16); // 101571ed3c506b39a22d9218202ae3da78a0d673445b24304055c7b4f141ace688b6486080ab8f69e28359cd116c90c
+// calculateSpecial(2, 8); // 1042
+// calculateSpecial(3, 8); // 10262054413
+// calculateSpecial(4, 8); // 10204
+// calculateSpecial(5, 8); // 1015
+// calculateSpecial(6, 8); // 10127114202562304053446
+// calculateSpecial(7, 8); // 10112362022474404517
+
+// multiply2("4", "4", 16); // 8AE4
+// multiply2("4", "c", 16); // 30
+// multiply2("1019c2d14ee4a", "a", 16);
+
+function multiply2(a, b, base) {
+  const product = Array(a.length + b.length).fill(0);
+  for (let i = a.length; i--; null) {
+    let carry = 0;
+    for (let j = b.length; j--; null) {
+      console.log(
+        "carry",
+        carry,
+        "a[i]",
+        a[i],
+        "b[j]",
+        b[j],
+        "before",
+        product[1 + i + j]
+      );
+      product[1 + i + j] = (
+        parseInt(product[1 + i + j], base) +
+        parseInt(carry, base) +
+        parseInt(a[i], base) * parseInt(b[j], base)
+      ).toString(base);
+      console.log("middle", product[1 + i + j]);
+      carry = Math.floor(parseInt(product[1 + i + j], base) / base).toString(
+        base
+      );
+      product[1 + i + j] = (parseInt(product[1 + i + j], base) % base).toString(
+        base
+      );
+      console.log("after", product[1 + i + j]);
+    }
+    product[i] = (parseInt(product[i], base) + parseInt(carry, base)).toString(
+      base
+    );
+    console.log("product", ...product);
+  }
+  console.log(
+    "FINAL product",
+    product.join("").replace(/^0*(\d||[a-z])/, "$1")
+  );
+  return product.join("").replace(/^0*(\d||[a-z])/, "$1");
+}

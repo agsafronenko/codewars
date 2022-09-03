@@ -35,157 +35,119 @@
 function calculateSpecial(lastDigit, base) {
   let number = lastDigit.toString(base);
   lastDigit = lastDigit.toString(base);
-  let count = 0; // used for testing purposes to avoid infinite calculations
-  let prevCut = "0"; // memory storage for previous number
+  let count = 0;
+  let prevCut = "0";
   let multiplication = "";
-  // core of the function: increases number until conditions are met
-  while (!conditions() && count < 100) {
+
+  // core of the function: increases the number until all conditions are met
+  // count is used for testing purposes to avoid infinite calculations
+  while (!conditions() && count < 130) {
     number = cut(multiplication);
     count++;
   }
 
-  // function changes the first and the last digits in a given number:
+  console.log("args:", ...arguments, "final result:", number);
+  return number;
+
+  // unites two checks and returns boolean (true if both conditions are met)
+  function conditions() {
+    multiplication = multiply(number);
+    return [replace(multiplication), lastDigitFunc(number)].every(
+      (x) => x === true
+    );
+  }
+
+  // 1st check: function takes multiplication (number * lastDigit), changes it's first and last digits and compares it with a given number
   function replace(product) {
-    let split = product.toString(base).split("");
+    let split = product.split("");
     let first = split.splice(0, 1);
-    if (split[0] === "0") {
-      // adding arbitrary string to the end of the number to ensure that numbers are not matched if the number has a leading zero
-      split.push("11111111");
-    }
-    return split.concat(first).join("");
+    return split.concat(first).join("") === number;
+  }
+
+  // 2nd: function checks whether the last digit of the parasitic number equals the lastDigit argument
+  function lastDigitFunc(num) {
+    let split = num.split("");
+    let last = split.slice(-1);
+    return last[0] === lastDigit;
   }
 
   // corkscrew method to find special number --> function slices the first digit and adds the last special digit to form a new number
   function cut(product) {
-    let split = product.toString(base).split("");
+    let split = product.split("");
     let firstOmitted = split.slice(1);
     let currCut1 =
       firstOmitted[0] === "0" || split.length === 1
-        ? split.concat(lastDigit.toString(base)).join("")
-        : split.slice(1).concat(lastDigit.toString(base)).join("");
+        ? split.concat(lastDigit).join("")
+        : split.slice(1).concat(lastDigit).join("");
     let currCut2 =
       prevCut !== currCut1
         ? currCut1
-        : split.slice().concat(lastDigit.toString(base)).join("");
+        : split.slice().concat(lastDigit).join("");
     prevCut = currCut2;
-    console.log("split", split, "currCut1", currCut1, "currCut2", currCut2);
     return currCut2;
   }
 
-  // checking whether the last digit of the parasitic number equals the first argument of the calculateSpecial() function
-  function lastDigitFunc(num) {
-    let split = num.toString(base).split("");
-    let last = split.slice(-1);
-    return last[0] === lastDigit.toString(base);
-  }
-
-  // unites two checks: whether the given number is a special parasitic number
-  function conditions() {
-    multiplication = multiply(number, lastDigit, base);
-    console.log(
-      "number",
-      number.toString(base),
-      "multiplication",
-      multiplication,
-      "replace",
-      replace(multiplication)
-    );
-    return [
-      number.toString(base) === replace(multiplication),
-      lastDigitFunc(number.toString(base)),
-    ].every((x) => x === true);
-  }
-
-  console.log(
-    "args:",
-    ...arguments,
-    "final result:",
-    number.toString(base),
-    "count",
-    count
-  );
-  return number.toString(base);
-
-  function multiply(a, b, base) {
-    const product = Array(a.length + b.length).fill(0);
-    for (let i = a.length; i--; null) {
+  // multiplying number and lastDigit
+  /* note: since some numbers are much larger than the MAX_SAFE_INTEGER and using BigInt() is not allowed by terms of the challenge: 
+      - parameters and result are stored as strings;
+      - multiplying is performed for each char (one by one) from the end to the beggining of the strings */
+  function multiply(num) {
+    const product = Array(num.length + lastDigit.length).fill(0);
+    for (let i = num.length - 1; i >= 0; i--) {
       let carry = 0;
-      for (let j = b.length; j--; null) {
-        product[1 + i + j] = (
-          parseInt(product[1 + i + j], base) +
-          parseInt(carry, base) +
-          parseInt(a[i], base) * parseInt(b[j], base)
-        ).toString(base);
-        carry = Math.floor(parseInt(product[1 + i + j], base) / base).toString(
-          base
-        );
-        product[1 + i + j] = (
-          parseInt(product[1 + i + j], base) % base
-        ).toString(base);
-      }
-      product[i] = (
-        parseInt(product[i], base) + parseInt(carry, base)
-      ).toString(base);
+      product[1 + i] =
+        parseInt(product[1 + i], base) +
+        carry +
+        parseInt(num[i], base) * parseInt(lastDigit, base);
+      carry = Math.floor(product[1 + i] / base);
+      product[1 + i] = (product[1 + i] % base).toString(base);
+      product[i] = (parseInt(product[i], base) + carry).toString(base);
     }
-    return product.join("").replace(/^0*(\d||[a-z])/, "$1");
+    return product.join("").replace(/^0*(.)/, "$1");
   }
 }
 
-// calculateSpecial(4, 10); // '102564'   --> 4  *  102564   = 410256
-// calculateSpecial(5, 10); // 102040816326530612244897959183673469387755
-// calculateSpecial(6, 10); //1016949152542372881355932203389830508474576271186440677966
-// calculateSpecial(3, 16); // 10572620ae4c415c9882b93
-// calculateSpecial(4, 16); // 104
-// calculateSpecial(10, 16); // 1019c2d14ee4a
-// calculateSpecial(12, 16); // 101571ed3c506b39a22d9218202ae3da78a0d673445b24304055c7b4f141ace688b6486080ab8f69e28359cd116c90c
-// calculateSpecial(2, 8); // 1042
-// calculateSpecial(3, 8); // 10262054413
-// calculateSpecial(4, 8); // 10204
-// calculateSpecial(5, 8); // 1015
-// calculateSpecial(6, 8); // 10127114202562304053446
-// calculateSpecial(7, 8); // 10112362022474404517
+calculateSpecial(4, 10); // '102564'   --> 4  *  102564   = 410256
+calculateSpecial(5, 10); // 102040816326530612244897959183673469387755
+calculateSpecial(6, 10); //1016949152542372881355932203389830508474576271186440677966
+calculateSpecial(3, 16); // 10572620ae4c415c9882b93
+calculateSpecial(4, 16); // 104
+calculateSpecial(10, 16); // 1019c2d14ee4a
+calculateSpecial(12, 16); // 101571ed3c506b39a22d9218202ae3da78a0d673445b24304055c7b4f141ace688b6486080ab8f69e28359cd116c90c
+calculateSpecial(2, 8); // 1042
+calculateSpecial(3, 8); // 10262054413
+calculateSpecial(4, 8); // 10204
+calculateSpecial(5, 8); // 1015
+calculateSpecial(6, 8); // 10127114202562304053446
+calculateSpecial(7, 8); // 10112362022474404517
 
-// multiply2("4", "4", 16); // 8AE4
-// multiply2("4", "c", 16); // 30
+// FUNCTION TO MULTIPLY TWO NUMBERS WITH BOTH HAVING LENGTH >= 2:
+
+// multiply2("4", "4", 16); // 10
+multiply2("4", "c", 16); // 30
 // multiply2("1019c2d14ee4a", "a", 16);
 
 function multiply2(a, b, base) {
   const product = Array(a.length + b.length).fill(0);
-  for (let i = a.length; i--; null) {
+  for (let i = a.length - 1; i >= 0; i--) {
     let carry = 0;
-    for (let j = b.length; j--; null) {
-      console.log(
-        "carry",
-        carry,
-        "a[i]",
-        a[i],
-        "b[j]",
-        b[j],
-        "before",
-        product[1 + i + j]
-      );
+    for (let j = b.length - 1; j >= 0; j--) {
       product[1 + i + j] = (
         parseInt(product[1 + i + j], base) +
         parseInt(carry, base) +
         parseInt(a[i], base) * parseInt(b[j], base)
       ).toString(base);
-      console.log("middle", product[1 + i + j]);
       carry = Math.floor(parseInt(product[1 + i + j], base) / base).toString(
         base
       );
       product[1 + i + j] = (parseInt(product[1 + i + j], base) % base).toString(
         base
       );
-      console.log("after", product[1 + i + j]);
     }
     product[i] = (parseInt(product[i], base) + parseInt(carry, base)).toString(
       base
     );
-    console.log("product", ...product);
   }
-  console.log(
-    "FINAL product",
-    product.join("").replace(/^0*(\d||[a-z])/, "$1")
-  );
-  return product.join("").replace(/^0*(\d||[a-z])/, "$1");
+  console.log("FINAL product", product.join("").replace(/^0*(.)/, "$1"));
+  return product.join("").replace(/^0*(.)/, "$1");
 }

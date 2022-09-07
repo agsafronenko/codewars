@@ -56,55 +56,41 @@
 // `SolvePuzzle()` returns matrix `int[][]`. The first indexer is for the row, the second indexer for the column. Python returns a 6-tuple of 6-tuples, Ruby a 6-Array of 6-Arrays.
 
 function solvePuzzle(clues) {
-  // clues = clues.map((x) => (x === 0 ? 9 : x));
   let fullArr = Array(36).fill(0);
-  fullArr = fullArr.map((x, i) => [x, i]); // assigning each digit indiviual index [0, ..., 80]
+  fullArr = fullArr.map((x, i) => [x, i]); // assigning each skyscraper indiviual index [0, ..., 35]
 
-  // assigning each digit it's row
+  // assigning each skyscraper it's row
+
   for (let i = 0; i < 6; i++) {
     for (let j = 0 + i * 6; j < 6 + i * 6; j++) {
       fullArr[j].push("row" + (i + 1));
     }
   }
-  // assigning each digit it's column
+  // assigning each skyscraper it's column
   for (let i = 0; i < 6; i++) {
     for (let j = 0 + i; j < 36; j = j + 6) {
       fullArr[j].push("col" + (i + 1));
     }
   }
-  // assigning each digit clue
+  // assigning each skyscraper it's clue
   for (let j = 0; j < 6; j++) {
     for (let i = 0; i < 36; i = i + 6) {
       fullArr[i + j].push("north", clues[0 + j], "east", clues[6 + i / 6], "south", clues[17 - j], "west", clues[23 - i / 6]);
     }
   }
 
-  // defining digits using clues = 1 or 6:
-  fullArr[0][0] = clues[0] === 1 ? 6 : 0;
-  fullArr[1][0] = clues[1] === 1 ? 6 : 0;
-  fullArr[2][0] = clues[2] === 1 ? 6 : 0;
-  fullArr[3][0] = clues[3] === 1 ? 6 : 0;
-  fullArr[4][0] = clues[4] === 1 ? 6 : 0;
-  fullArr[5][0] = clues[5] === 1 ? 6 : 0;
-  fullArr[5][0] = clues[6] === 1 ? 6 : 0;
-  fullArr[11][0] = clues[7] === 1 ? 6 : 0;
-  fullArr[17][0] = clues[8] === 1 ? 6 : 0;
-  fullArr[23][0] = clues[9] === 1 ? 6 : 0;
-  fullArr[29][0] = clues[10] === 1 ? 6 : 0;
-  fullArr[35][0] = clues[11] === 1 ? 6 : 0;
-  fullArr[35][0] = clues[12] === 1 ? 6 : 0;
-  fullArr[34][0] = clues[13] === 1 ? 6 : 0;
-  fullArr[33][0] = clues[14] === 1 ? 6 : 0;
-  fullArr[32][0] = clues[15] === 1 ? 6 : 0;
-  fullArr[31][0] = clues[16] === 1 ? 6 : 0;
-  fullArr[30][0] = clues[17] === 1 ? 6 : 0;
-  fullArr[30][0] = clues[18] === 1 ? 6 : 0;
-  fullArr[24][0] = clues[19] === 1 ? 6 : 0;
-  fullArr[18][0] = clues[20] === 1 ? 6 : 0;
-  fullArr[12][0] = clues[21] === 1 ? 6 : 0;
-  fullArr[6][0] = clues[22] === 1 ? 6 : 0;
-  fullArr[0][0] = clues[23] === 1 ? 6 : 0;
+  // defining location of skyscrapers using clues = 1:
+  for (let i = 0; i < 6; i++) {
+    fullArr[i][0] = clues[i] === 1 ? 6 : 0;
+    fullArr[5 + i * 6][0] = clues[6 + i] === 1 ? 6 : 0;
+  }
 
+  for (let i = 0; i < 6; i++) {
+    fullArr[35 - i][0] = clues[12 + i] === 1 ? 6 : 0;
+    fullArr[30 - i * 6][0] = clues[18 + i] === 1 ? 6 : 0;
+  }
+
+  // defining location of skyscrapers using clues = 6:
   for (let i = 0; i < 6; i++) {
     if (clues[i] === 6) {
       for (let j = 0; j < 36; j = j + 6) {
@@ -128,38 +114,82 @@ function solvePuzzle(clues) {
     }
   }
 
-  // YOU LEFT HERE - CHECK THE CODE WITH THE CURRENT SELECTED CLUES
-  // for (let i = 0; i < 6; i++) {
-  //   if (clues[i] + clues[17 - i] === 7) {
-  //     fullArr[i + (clues[i] - 1) * 6] = 6;
-  //   }
-  // }
+  //finding 6-tall skyscraper in the middle of the line
+  for (let i = 0; i < 6; i++) {
+    if (clues[i] + clues[17 - i] === 7) {
+      fullArr[i + (clues[i] - 1) * 6][0] = 6;
+    }
+  }
 
-  console.log(fullArr);
+  for (let i = 0; i < 6; i++) {
+    if (clues[i + 6] + clues[23 - i] === 7) {
+      fullArr[i * 6 + (clues[23 - i] - 1)][0] = 6;
+    }
+  }
+
+  // searching for 6-tall skyscrapers near borders (zero/one step from the border) if clues[i] === 5
+  for (let i = 0; i < 6; i++) {
+    if (clues[i] === 5 && !fullArr.filter((x) => x[3] === `col${i + 1}`).some((x) => x[0] === 6)) {
+      if (fullArr.filter((arr) => arr[2] === "row5").some((x) => x[0] === 6) && !fullArr.filter((arr) => arr[2] === "row6").some((x) => x[0] === 6)) {
+        fullArr[i + 30][0] = 6;
+      } else {
+        if (!fullArr.filter((arr) => arr[2] === "row5").some((x) => x[0] === 6) && fullArr.filter((arr) => arr[2] === "row6").some((x) => x[0] === 6)) {
+          fullArr[i + 24][0] = 6;
+        }
+      }
+    }
+    if (clues[17 - i] === 5 && !fullArr.filter((x) => x[3] === `col${i + 1}`).some((x) => x[0] === 6)) {
+      if (fullArr.filter((arr) => arr[2] === "row1").some((x) => x[0] === 6) && !fullArr.filter((arr) => arr[2] === "row2").some((x) => x[0] === 6)) {
+        fullArr[i + 6][0] = 6;
+      } else {
+        if (!fullArr.filter((arr) => arr[2] === "row1").some((x) => x[0] === 6) && fullArr.filter((arr) => arr[2] === "row2").some((x) => x[0] === 6)) {
+          fullArr[i + 0][0] = 6;
+        }
+      }
+    }
+    if (clues[i + 6] === 5 && !fullArr.filter((x) => x[2] === `row${i + 1}`).some((x) => x[0] === 6)) {
+      if (fullArr.filter((arr) => arr[3] === "col1").some((x) => x[0] === 6) && !fullArr.filter((arr) => arr[3] === "col2").some((x) => x[0] === 6)) {
+        fullArr[i * 6 + 1][0] = 6;
+      } else {
+        if (!fullArr.filter((arr) => arr[3] === "col1").some((x) => x[0] === 6) && fullArr.filter((arr) => arr[3] === "col2").some((x) => x[0] === 6)) {
+          fullArr[i * 6 + 0][0] = 6;
+        }
+      }
+    }
+    if (clues[23 - i] === 5 && !fullArr.filter((x) => x[2] === `row${i + 1}`).some((x) => x[0] === 6)) {
+      if (fullArr.filter((arr) => arr[3] === "col5").some((x) => x[0] === 6) && !fullArr.filter((arr) => arr[3] === "col6").some((x) => x[0] === 6)) {
+        fullArr[i * 6 + 5][0] = 6;
+      } else {
+        if (!fullArr.filter((arr) => arr[3] === "col5").some((x) => x[0] === 6) && fullArr.filter((arr) => arr[3] === "col6").some((x) => x[0] === 6)) {
+          fullArr[i * 6 + 4][0] = 6;
+        }
+      }
+    }
+  }
 
   let changes = []; // storing all changes made to "puzzle"
-  let lastChangeIndex; // storing the index of the last changed digit
+  let lastChangeIndex; // storing the index of the last changed digit (digit means the height of the skyscraper)
   let lastChangeDigit; // storing the last digit that was changed
-  let startingDigit = 1; // brute-force for a digit will start from this value (1: by default; lastChangeDigit + 1: in case the last changed digit led to breaking sudoku rules)
+  let startingDigit = 1; // brute-force for a digit will start from this value (1: by default; lastChangeDigit + 1: in case the last changed digit led to breaking puzzle rules)
   let count2 = 0;
 
-  for (let n = 0; n < 36 && count2 < 8000000; n++) {
+  for (let n = 0; n < 36 && count2 < 6000000; n++) {
     // brute-forcing
     if (fullArr[n][0] !== 0) {
-      // pass the digits that has already been defined (clues = 1 or 6)
+      // pass the digits that has already been defined (before the brute-force, see code above)
       startingDigit = 1;
       continue;
     } else {
       count2++;
-      let indQ = fullArr[n]; // define row and col of the digit to be brute-forced
+      let indQ = fullArr[n]; // define row, col and clues of the digit to be brute-forced
       let rowQ = fullArr.filter((x) => x[2] === indQ[2]).map((x) => x[0]);
       let colQ = fullArr.filter((x) => x[3] === indQ[3]).map((x) => x[0]);
       for (let j = startingDigit; j <= 6; j++) {
         if (rowQ.includes(j) || colQ.includes(j)) {
-          // if the new value of the digit contradict the challenge rules, continue with the next value
+          // if the new value of the digit contradict the puzzle rules, continue with the next value
           continue;
         } else {
-          changes.push([fullArr[n][0], fullArr[n][1], j]); // if the new value of the digit doesn't contradict the challenge rules, set this value for the digit
+          changes.push([fullArr[n][0], fullArr[n][1], j]); // if the new value of the digit doesn't contradict the puzzle rules, set this value for the digit
           fullArr[n][0] = j;
           break;
         }
@@ -178,6 +208,7 @@ function solvePuzzle(clues) {
     }
   }
 
+  // checking whether the new digit meets the puzzle rules (for clues from the east and the south sides)
   function cluesCheckReverse(lineQ, clues, n) {
     if (clues[1] === 0) {
       return true;
@@ -198,6 +229,7 @@ function solvePuzzle(clues) {
     }
   }
 
+  // checking whether the new digit meets the puzzle rules (for clues from the west and the north sides)
   function cluesCheck(lineQ, clues, n) {
     if (clues[0] === 0) {
       return true;
@@ -211,28 +243,14 @@ function solvePuzzle(clues) {
         }
       }
       if (fullArr[n][0] === 5) {
-        // console.log(
-        //   "count2",
-        //   count2,
-        //   "n",
-        //   n,
-        //   "j",
-        //   fullArr[n][0],
-        //   "count",
-        //   count,
-        //   "clues[0]",
-        //   clues[0] - 1,
-        //   clues[0] - 1 === count
-        // );
       }
       return fullArr[n][0] === 4 && !lineQ.includes(6) ? count <= clues[0] - 1 : fullArr[n][0] === 5 && !lineQ.includes(6) ? count === clues[0] - 1 : fullArr[n][0] === 6 ? count === clues[0] : lineQ.includes(0) ? clues[0] >= count : clues[0] === count;
     }
   }
 
   function reverse(fullArr) {
-    // revert fullArr to the state before the last change and delete the record of the last change from changes array
-    // let lastChange = changes.splice(changes.length - 1).flat();
-    let lastChange = [].concat(...changes.splice(changes.length - 1)); // using concat instead of flat() func as codewars don't consider flat() as a function
+    // revert fullArr to the state before the last change and delete the record of the last change from the changes array
+    let lastChange = [].concat(...changes.splice(changes.length - 1));
     fullArr[lastChange[1]][0] = lastChange[0];
     lastChangeIndex = lastChange[1];
     lastChangeDigit = lastChange[2];
@@ -254,51 +272,29 @@ function solvePuzzle(clues) {
   return finalArr;
 }
 
-// var clues = [
-//   3, 2, 2, 3, 2, 1, 1, 2, 3, 3, 2, 2, 5, 1, 2, 2, 4, 3, 3, 2, 1, 2, 2, 4,
-// ];
-// [[ 2, 1, 4, 3, 5, 6],
-// [ 1, 6, 3, 2, 4, 5],
-// [ 4, 3, 6, 5, 1, 2],
-// [ 6, 5, 2, 1, 3, 4],
-// [ 5, 4, 1, 6, 2, 3],
-// [ 3, 2, 5, 4, 6, 1]];
+function batch() {
+  let start = performance.now();
+  solvePuzzle([3, 2, 2, 3, 2, 1, 1, 2, 3, 3, 2, 2, 5, 1, 2, 2, 4, 3, 3, 2, 1, 2, 2, 4]);
+  solvePuzzle([0, 0, 0, 2, 2, 0, 0, 0, 0, 6, 3, 0, 0, 4, 0, 0, 0, 0, 4, 4, 0, 3, 0, 0]);
+  solvePuzzle([0, 3, 0, 5, 3, 4, 0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 2, 3, 3, 2, 0, 3, 1, 0]);
+  solvePuzzle([0, 4, 0, 0, 0, 0, 4, 4, 0, 3, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 6, 3, 0]);
+  solvePuzzle([3, 2, 0, 3, 1, 0, 0, 3, 0, 5, 3, 4, 0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 2, 3]);
+  solvePuzzle([4, 3, 2, 5, 1, 5, 2, 2, 2, 2, 3, 1, 1, 3, 2, 3, 3, 3, 5, 4, 1, 2, 3, 4]);
+  solvePuzzle([2, 2, 2, 2, 3, 1, 1, 3, 2, 3, 3, 3, 5, 4, 1, 2, 3, 4, 4, 3, 2, 5, 1, 5]);
+  solvePuzzle([0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 2, 3, 3, 2, 0, 3, 1, 0, 0, 3, 0, 5, 3, 4]);
+  solvePuzzle([1, 3, 2, 3, 3, 3, 5, 4, 1, 2, 3, 4, 4, 3, 2, 5, 1, 5, 2, 2, 2, 2, 3, 1]);
+  solvePuzzle([1, 2, 3, 3, 2, 2, 5, 1, 2, 2, 4, 3, 3, 2, 1, 2, 2, 4, 3, 2, 2, 3, 2, 1]);
+  solvePuzzle([3, 2, 1, 2, 2, 4, 3, 2, 2, 3, 2, 1, 1, 2, 3, 3, 2, 2, 5, 1, 2, 2, 4, 3]);
+  solvePuzzle([0, 0, 0, 2, 2, 0, 0, 0, 0, 6, 3, 0, 0, 4, 0, 0, 0, 0, 4, 4, 0, 3, 0, 0]);
+  solvePuzzle([0, 0, 0, 6, 3, 0, 0, 4, 0, 0, 0, 0, 4, 4, 0, 3, 0, 0, 0, 0, 0, 2, 2, 0]);
+  solvePuzzle([0, 3, 0, 5, 3, 4, 0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 2, 3, 3, 2, 0, 3, 1, 0]);
+  solvePuzzle([5, 4, 1, 2, 3, 4, 4, 3, 2, 5, 1, 5, 2, 2, 2, 2, 3, 1, 1, 3, 2, 3, 3, 3]);
+  solvePuzzle([5, 1, 2, 2, 4, 3, 3, 2, 1, 2, 2, 4, 3, 2, 2, 3, 2, 1, 1, 2, 3, 3, 2, 2]);
+  solvePuzzle([0, 3, 0, 3, 2, 3, 3, 2, 0, 3, 1, 0, 0, 3, 0, 5, 3, 4, 0, 0, 0, 0, 0, 1]);
+  solvePuzzle([4, 4, 0, 3, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 6, 3, 0, 0, 4, 0, 0, 0, 0]);
 
-// var clues = [
-//   0, 0, 0, 2, 2, 0, 0, 0, 0, 6, 3, 0, 0, 4, 0, 0, 0, 0, 4, 4, 0, 3, 0, 0,
-// ];
-// [
-//   [5, 6, 1, 4, 3, 2],
-//   [4, 1, 3, 2, 6, 5],
-//   [2, 3, 6, 1, 5, 4],
-//   [6, 5, 4, 3, 2, 1],
-//   [1, 2, 5, 6, 4, 3],
-//   [3, 4, 2, 5, 1, 6],
-// ];
+  let duration = performance.now() - start;
+  console.log("duration", duration);
+}
 
-// var clues = [
-// 0, 3, 0, 5, 3, 4, 0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 2, 3, 3, 2, 0, 3, 1, 0,
-// ];
-
-// [ [5, 2, 6, 1, 4, 3],
-//   [6, 4, 3, 2, 5, 1],
-//   [3, 1, 5, 4, 6, 2],
-//   [2, 6, 1, 5, 3, 4],
-//   [4, 3, 2, 6, 1, 5],
-//   [1, 5, 4, 3, 2, 6]];
-
-// solvePuzzle([3, 2, 2, 3, 2, 1, 1, 2, 3, 3, 2, 2, 5, 1, 2, 2, 4, 3, 3, 2, 1, 2, 2, 4]);
-// solvePuzzle([0, 0, 0, 2, 2, 0, 0, 0, 0, 6, 3, 0, 0, 4, 0, 0, 0, 0, 4, 4, 0, 3, 0, 0]);
-// solvePuzzle([0, 3, 0, 5, 3, 4, 0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 2, 3, 3, 2, 0, 3, 1, 0]);
-// solvePuzzle([0, 4, 0, 0, 0, 0, 4, 4, 0, 3, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 6, 3, 0]);
-// solvePuzzle([3, 2, 0, 3, 1, 0, 0, 3, 0, 5, 3, 4, 0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 2, 3]);
-solvePuzzle([4, 3, 2, 5, 1, 5, 2, 2, 2, 2, 3, 1, 1, 3, 2, 3, 3, 3, 5, 4, 1, 2, 3, 4]);
-// solvePuzzle([2, 2, 2, 2, 3, 1, 1, 3, 2, 3, 3, 3, 5, 4, 1, 2, 3, 4, 4, 3, 2, 5, 1, 5]);
-// solvePuzzle([0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 2, 3, 3, 2, 0, 3, 1, 0, 0, 3, 0, 5, 3, 4]);
-// solvePuzzle([1, 3, 2, 3, 3, 3, 5, 4, 1, 2, 3, 4, 4, 3, 2, 5, 1, 5, 2, 2, 2, 2, 3, 1]);
-// solvePuzzle([1, 2, 3, 3, 2, 2, 5, 1, 2, 2, 4, 3, 3, 2, 1, 2, 2, 4, 3, 2, 2, 3, 2, 1]);
-// solvePuzzle([3, 2, 1, 2, 2, 4, 3, 2, 2, 3, 2, 1, 1, 2, 3, 3, 2, 2, 5, 1, 2, 2, 4, 3]);
-// solvePuzzle([0, 0, 0, 2, 2, 0, 0, 0, 0, 6, 3, 0, 0, 4, 0, 0, 0, 0, 4, 4, 0, 3, 0, 0]);
-// solvePuzzle([0, 0, 0, 6, 3, 0, 0, 4, 0, 0, 0, 0, 4, 4, 0, 3, 0, 0, 0, 0, 0, 2, 2, 0]);
-// solvePuzzle([0, 3, 0, 5, 3, 4, 0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 2, 3, 3, 2, 0, 3, 1, 0]);
-// solvePuzzle([0, 3, 0, 3, 2, 3, 3, 2, 0, 3, 1, 0, 0, 3, 0, 5, 3, 4, 0, 0, 0, 0, 0, 1]);
+batch();

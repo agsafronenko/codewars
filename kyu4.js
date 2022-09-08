@@ -1,4 +1,4 @@
-// 'use strict
+"use strict";
 
 // to set-up "live-server" for another html file use this command:
 // "   live-server --port=1234 --open=public --entry-file=index2.html   "
@@ -116,11 +116,7 @@ function findAll(n, k) {
   const duration = performance.now() - start;
   console.log(duration);
 
-  return [
-    satisfiedNum.length,
-    satisfiedNum[satisfiedNum.length - 1].toString(),
-    satisfiedNum[0].toString(),
-  ];
+  return [satisfiedNum.length, satisfiedNum[satisfiedNum.length - 1].toString(), satisfiedNum[0].toString()];
 }
 
 console.log(findAll(10, 3)); // [8, 118, 334]

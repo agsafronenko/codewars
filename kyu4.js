@@ -44,7 +44,7 @@ function findAll(n, k) {
   }
 
   let endingDigits = "";
-  startingNum = Number(startingNumFunc(n, k));
+  let startingNum = Number(startingNumFunc(n, k));
 
   function startingNumFunc(n, k) {
     if (n === k) {
@@ -70,7 +70,7 @@ function findAll(n, k) {
   }
 
   let startingDigits = "";
-  endingNum = Number(endingNumFunc(n, k));
+  let endingNum = Number(endingNumFunc(n, k));
 
   function endingNumFunc(n, k) {
     if (n % k === 0) {

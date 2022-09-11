@@ -86,24 +86,16 @@ function spiralize(n) {
       startingInd = lineQ.find((x) => x[1] === indQ[1])[1];
       let sliceStart = lineQ.findIndex((x) => x[1] === indQ[1]) + 1;
       let occupied = lineQ.slice(sliceStart).findIndex((x) => x[0] === 1);
-      endingInd =
-        occupied === -1
-          ? lineQ[lineQ.length - 1][1]
-          : lineQ.slice(sliceStart)[occupied][1] - indentFromFilledCell;
+      endingInd = occupied === -1 ? lineQ[lineQ.length - 1][1] : lineQ.slice(sliceStart)[occupied][1] - indentFromFilledCell;
     } else {
       lineQ = lineQ.reverse();
       let sliceStart = lineQ.findIndex((x) => x[1] === indQ[1]) + 1;
       let occupied = lineQ.slice(sliceStart).findIndex((x) => x[0] === 1);
-      startingInd =
-        occupied === -1
-          ? lineQ[lineQ.length - 1][1]
-          : lineQ.slice(sliceStart)[occupied][1] - indentFromFilledCell;
+      startingInd = occupied === -1 ? lineQ[lineQ.length - 1][1] : lineQ.slice(sliceStart)[occupied][1] - indentFromFilledCell;
       endingInd = lineQ.find((x) => x[1] === indQ[1])[1];
     }
 
-    let cellsToChange = lineQ
-      .filter((x) => x[1] >= startingInd && x[1] <= endingInd)
-      .map((x) => x[1]);
+    let cellsToChange = lineQ.filter((x) => x[1] >= startingInd && x[1] <= endingInd).map((x) => x[1]);
     for (let i = 0; i < cellsToChange.length; i++) {
       fullArr[cellsToChange[i]][0] = 1;
     }
